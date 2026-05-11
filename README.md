@@ -98,11 +98,51 @@ code --version     # VS Code (recomendado)
 
 ### Cuenta y permisos
 
-- Una cuenta de GitHub con acceso para crear repositorios públicos
+- Una cuenta de GitHub (personal o corporativa) con acceso para crear repositorios
 - Git configurado con tu usuario: `git config --global user.email "tu@email.com"`
-- GitHub CLI autenticado: `gh auth login`
+- GitHub CLI autenticado (ver instrucciones abajo)
 
-> 📝 **NOTA:** Si `gh auth login` te pide un token y no tienes uno, ve a GitHub: **Settings > Developer settings > Personal access tokens > Fine-grained tokens**. Necesitas permisos de `repo` y `workflow`.
+#### Autenticación con GitHub CLI (`gh`)
+
+<details>
+<summary>👤 <strong>Cuenta personal (github.com)</strong></summary>
+
+```bash
+gh auth login
+# Selecciona: GitHub.com → HTTPS → Login with a web browser
+# Se abrirá el navegador para autorizar
+```
+
+Verifica con: `gh auth status`
+
+Si prefieres usar un token (sin navegador):
+1. Ve a **Settings > Developer settings > Personal access tokens > Fine-grained tokens**
+2. Crea un token con permisos: `repo`, `workflow`, `packages:write`
+3. Ejecuta:
+```bash
+gh auth login --with-token < token.txt
+# O pega el token cuando te lo pida
+```
+
+</details>
+
+<details>
+<summary>🏢 <strong>Cuenta corporativa (GitHub Enterprise)</strong></summary>
+
+```bash
+gh auth login --hostname github.TU_EMPRESA.com
+# Selecciona: HTTPS → Login with a web browser (o token)
+```
+
+Si tu empresa usa SSO, después de autenticarte necesitas autorizar el token para la organización:
+1. Ve a **Settings > Personal access tokens**
+2. Junto a tu token, haz clic en **Configure SSO** → **Authorize** en tu organización
+
+Verifica con: `gh auth status --hostname github.TU_EMPRESA.com`
+
+> 💡 **Tip:** Si necesitas trabajar con ambas cuentas (personal + enterprise), `gh` soporta múltiples hosts simultáneamente.
+
+</details>
 
 ### Extensiones de VS Code (recomendadas)
 
@@ -133,12 +173,50 @@ dotnet test
 dotnet format --verify-no-changes
 ```
 
-> ⚠️ **Usuarios de GitHub Enterprise:** Si `--template` no está disponible, clona manualmente y sube a un repo nuevo en tu organización:
-> ```bash
-> git clone https://github.com/armandoblanco/workshop-github-intermedio.git workshop-github-intermedio-TU_USUARIO
-> cd workshop-github-intermedio-TU_USUARIO
-> gh repo create TU_ORG/workshop-github-intermedio-TU_USUARIO --private --source . --push
-> ```
+<details>
+<summary>🔄 <strong>Opción B — Clonar y reconectar el origen manualmente</strong></summary>
+
+Si `--template` no está disponible o prefieres hacerlo paso a paso:
+
+```bash
+# 1. Clonar el repositorio base
+git clone https://github.com/armandoblanco/workshop-github-intermedio.git \
+  workshop-github-intermedio-TU_USUARIO
+cd workshop-github-intermedio-TU_USUARIO
+
+# 2. Crear un repositorio vacío en tu organización (sin README ni .gitignore)
+gh repo create TU_ORG/workshop-github-intermedio-TU_USUARIO --private
+
+# 3. Cambiar el remote origin para apuntar al repo nuevo
+git remote set-url origin https://github.com/TU_ORG/workshop-github-intermedio-TU_USUARIO.git
+
+# 4. Subir todo el contenido
+git push -u origin main
+```
+
+</details>
+
+<details>
+<summary>🌐 <strong>Opción C — Crear el repo desde la interfaz web</strong></summary>
+
+Si no tienes `gh` CLI o hay restricciones de red:
+
+1. Ve a **github.com** → botón **+** → **New repository**
+2. Nombre: `workshop-github-intermedio-TU_USUARIO`, visibilidad **Private**
+3. **No** marques "Add README" ni ".gitignore" (el repo debe estar vacío)
+4. En tu terminal local:
+
+```bash
+git clone https://github.com/armandoblanco/workshop-github-intermedio.git \
+  workshop-github-intermedio-TU_USUARIO
+cd workshop-github-intermedio-TU_USUARIO
+
+# Reemplazar el remote con tu repo nuevo
+git remote set-url origin https://github.com/TU_ORG/workshop-github-intermedio-TU_USUARIO.git
+git push -u origin main
+```
+
+</details>
 
 > ⚠️ Los **cuatro comandos** deben terminar sin errores. Si alguno falla, revisa la sección de [Troubleshooting](#-troubleshooting) al final.
 
